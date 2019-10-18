@@ -1,7 +1,17 @@
 ---
 - import_tasks: install.yml
 - import_tasks: clients.yml
-- import_tasks: schemas.yml
-- import_tasks: log.yml
-- import_tasks: mysql.yml
 
+- name: INCLUDE | database mysql
+  include_tasks: schemas.yml
+  when: freeradius_system_users == 'mysql'
+
+- import_tasks: log.yml
+
+- name: INCLUDE | config user mysql
+  include_tasks: mysql.yml
+  when: freeradius_system_users == 'mysql'
+
+- name: INCLUDE | config LDAP
+  include_tasks: ldap.yml
+  when: freeradius_system_users == 'ldap'

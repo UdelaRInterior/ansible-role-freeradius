@@ -13,8 +13,24 @@ freeradius_clients:
     ipaddr: 192.168.66.1
     secret: "{{ freeradius_clients_default_password }}"
 
+freeradius_system_users: mysql #ldap or mysql
+
 freeradius_mysql:
   database: freeradius
   host: mysqlserver
   user: master
   password: master
+
+freeradius_ldap_server: 'ldap.com'
+freeradius_ldap_port: 389
+freeradius_ldap_identity: 'cn=login,cn=admin,ou=group,dc=example,dc=net'
+freeradius_ldap_password: ''
+freeradius_ldap_base_dn: 'dc=example,dc=net'
+freeradius_ldap_membership_attribute: 'memberOf'
+freeradius_ldap_filter: !unsafe '(cn=%{%{Stripped-User-Name}:-%{User-Name}})'
+freeradius_ldap_membership_filter: !unsafe '(|(member=%{control:Ldap-UserDn})(memberUid=%{%{Stripped-User-Name}:-%{User-Name}}))'
+
+
+
+
+

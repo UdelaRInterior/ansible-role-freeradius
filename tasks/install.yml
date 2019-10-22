@@ -29,3 +29,38 @@
     name: freeradius
     enabled: yes
 
+- name: copy template certificates
+  template:
+    src: '{{ item }}.j2'
+    dest: "/etc/freeradius/{{ freeradius_version }}/certs/{{ item }}"
+  with_items:
+    - ca.cnf
+    - server.cnf
+  notify:
+    restart freeradius
+
+- name: Download ca.crt
+  get_url:
+    url: http://eduroam.uy/docs/ca.crt
+    dest: /etc/freeradius/3.0/certs/ca.crt
+    owner: freerad
+    group: freerad
+    mode: '0440'
+
+- name: Generate an OpenSSL private key 
+  openssl_privatekey:
+    path: /etc/freeradius/3.0/certs/server.key
+    passphrase: '{{ freeradius_password_ca }}'
+    cipher: auto
+    size: 2048
+    state: present
+
+- name: "Generate csr"
+  openssl_csr:
+    path: "/etc/freeradius/3.0/certs/radius.interior.csr"
+    privatekey_path: "/etc/freeradius/3.0/certs/server.key"
+    country_name: '{{ freeradius_code_country }}'
+    organization_name: '{{ freeradius_organization }}'
+    email_address: '{{ freeradius_email }}'
+    common_name: '{{ freeradius_common_name }}'
+    privatekey_passphrase: '{{ freeradius_password_ca }}'

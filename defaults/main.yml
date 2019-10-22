@@ -30,7 +30,13 @@ freeradius_ldap_membership_attribute: 'memberOf'
 freeradius_ldap_filter: !unsafe '(cn=%{%{Stripped-User-Name}:-%{User-Name}})'
 freeradius_ldap_membership_filter: !unsafe '(|(member=%{control:Ldap-UserDn})(memberUid=%{%{Stripped-User-Name}:-%{User-Name}}))'
 
-
+freeradius_password_ca: '{{ freeradius_vault_password_ca }}'
+freeradius_code_country: UY
+freeradius_state: Montevideo
+freeradius_locality: Montevideo
+freeradius_organization: Example Inc.
+freeradius_email: admin@example.net
+freeradius_common_name: server.edu.net
 
 
 

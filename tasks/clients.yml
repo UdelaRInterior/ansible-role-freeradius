@@ -1,7 +1,11 @@
 ---
-- name: clients.j2
+
+- name: copy template
   template:
-    src: templates/clients.j2
-    dest: "/etc/freeradius/{{ freeradius_version }}/clients.conf"
+    src: '{{ item }}.j2'
+    dest: "/etc/freeradius/{{ freeradius_version }}/{{ item }}.conf"
+  with_items:
+    - clients
+    - proxy
   notify:
     restart freeradius

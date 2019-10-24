@@ -356,6 +356,14 @@ authorize {
 	#  initial set of packets that go back and forth to set up
 	#  TTLS or PEAP.
 	#
+{% for realm in freeradius_realm %}
+    if ( Realm == '{{ realm }}' ) {
+         update control {
+            &Proxy-To-Realm := LOCAL
+         }
+    }
+{% endfor %}
+	
 	eap {
 		ok = return
 	}
@@ -553,7 +561,6 @@ preacct {
 	#
 
 #	update request {
-#	  	FreeRADIUS-Acct-Session-Start-Time = "%{expr: %l - %{%{Acct-Session-Time}:-0} - %{%{Acct-Delay-Time}:-0}}"
 #	}
 
 

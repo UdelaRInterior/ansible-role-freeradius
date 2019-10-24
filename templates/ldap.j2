@@ -17,19 +17,19 @@ ldap {
 	#  - ldaps:// (LDAP over SSL)
 	#  - ldapi:// (LDAP over Unix socket)
 	#  - ldapc:// (Connectionless LDAP)
-	server = '{{ freeradius_ldap_server }}'
+	server = '{{ freeradius_ldap.server }}'
 
 	#  Port to connect on, defaults to 389, will be ignored for LDAP URIs.
-	port = {{freeradius_ldap_port}}
+	port = {{freeradius_ldap.port}}
 
 	#  Administrator account for searching and possibly modifying.
 	#  If using SASL + KRB5 these should be commented out.
-	identity = '{{ freeradius_ldap_identity }}'
-	password = '{{ freeradius_ldap_password }}'
+	identity = '{{ freeradius_ldap.identity }}'
+	password = '{{ freeradius_ldap.password }}'
 
 	#  Unless overridden in another section, the dn from which all
 	#  searches will start from.
-	base_dn = '{{ freeradius_ldap_base_dn }}'
+	base_dn = '{{ freeradius_ldap.base_dn }}'
 
 	#
 	#  SASL parameters to use for admin binds
@@ -53,13 +53,17 @@ ldap {
 	#
 	sasl {
 		# SASL mechanism
-#		mech = 'PLAIN'
-
+    {% if freeradius_ldap.sasl_mech is defined %}
+		mech = '{{ freeradius_ldap.sasl_mech }}''
+	{% endif %}
 		# SASL authorisation identity to proxy.
-#		proxy = 'autz_id'
-
+    {% if freeradius_ldap.sasl_proxy is defined %}
+		proxy = '{{ freeradius_ldap.sasl_proxy }}'
+	{% endif %}
 		# SASL realm. Used for kerberos.
-#		realm = 'example.org'
+    {% if freeradius_ldap.sasl_realm is defined %}
+		realm = '{{ freeradius_ldap.sasl_realm }}'
+	{% endif %}
 	}
 
 	#
@@ -79,8 +83,9 @@ ldap {
 	#  	<value>:	Is the value to parse into the new valuepair.
 	# 			If the value is wrapped in double quotes it
 	#			will be xlat expanded.
-#	valuepair_attribute = 'radiusAttribute'
-
+    {% if freeradius_ldap.valuepair_attribute is defined %}
+	valuepair_attribute = '{{ freeradius_ldap.valuepair_attribute }}'
+	{% endif %}
 	#
 	#  Mapping of LDAP directory attributes to RADIUS dictionary attributes.
 	#
@@ -109,12 +114,24 @@ ldap {
 	#  the name value to be derived from an xlat expansion, or an
 	#  attribute ref.
 	update {
+    {% if freeradius_ldap.control_password is defined %}
 		control:Password-With-Header	+= 'userPassword'
-#		control:NT-Password		:= 'ntPassword'
-#		reply:Reply-Message		:= 'radiusReplyMessage'
-#		reply:Tunnel-Type		:= 'radiusTunnelType'
-#		reply:Tunnel-Medium-Type	:= 'radiusTunnelMediumType'
-#		reply:Tunnel-Private-Group-ID	:= 'radiusTunnelPrivategroupId'
+	{% endif %}
+    {% if freeradius_ldap.control_ntpassword is defined %}
+		control:NT-Password		:= 'ntPassword'
+	{% endif %}
+    {% if freeradius_ldap.control_reply_message is defined %}
+		reply:Reply-Message		:= 'radiusReplyMessage'
+	{% endif %}
+    {% if freeradius_ldap.control_tunnel_type is defined %}
+		reply:Tunnel-Type		:= 'radiusTunnelType'
+	{% endif %}
+    {% if freeradius_ldap.control_tunnel_medium_type is defined %}
+		reply:Tunnel-Medium-Type	:= 'radiusTunnelMediumType'
+	{% endif %}
+    {% if freeradius_ldap.control_tunnel_private_group is defined %}
+		reply:Tunnel-Private-Group-ID	:= 'radiusTunnelPrivategroupId'
+	{% endif %}
 
 		#  Where only a list is specified as the RADIUS attribute,
 		#  the value of the LDAP attribute is parsed as a valuepair
@@ -126,30 +143,35 @@ ldap {
 
 	#  Set to yes if you have eDirectory and want to use the universal
 	#  password mechanism.
-#	edir = no
+    {% if freeradius_ldap.edir is defined %}
+		edir = {{ freeradius_ldap.edir }}
+	{% endif %}
 
 	#  Set to yes if you want to bind as the user after retrieving the
 	#  Cleartext-Password. This will consume the login grace, and
 	#  verify user authorization.
-#	edir_autz = no
+    {% if freeradius_ldap.edir_autz is defined %}
+		edir_autz = {{ freeradius_ldap.edir_autz }}
+	{% endif %}
 
 	#  Note: set_auth_type was removed in v3.x.x
 	#  Equivalent functionality can be achieved by adding the following
 	#  stanza to the authorize {} section of your virtual server.
-	
-#	    ldap
-#	    if ((ok || updated) && User-Password) {
-#	        update {
-#	            control:Auth-Type := ldap
-#	        }
-#	    }
+    {% if freeradius_ldap.auth_type_ldap is defined %}
+	    ldap
+	    if ((ok || updated) && User-Password) {
+	        update {
+	            control:Auth-Type := ldap
+	        }
+	    }
+	{% endif %}
 
 	#
 	#  User object identification.
 	#
 	user {
 		#  Where to start searching in the tree for users
-		base_dn = '{{ freeradius_ldap_base_dn }}'
+		base_dn = '{{ freeradius_ldap.base_dn }}'
 
 		#  Filter for user objects, should be specific enough
 		#  to identify a single user object.
@@ -158,7 +180,7 @@ ldap {
 		#  "samaccountname=" instead of "uid="
 		#
 		#
-		filter = "{{ freeradius_ldap_filter }}"
+		filter = "{{ freeradius_ldap.filter }}"
 
 		#  When we're prompted by the SASL library, these control
 		#  the responses given.
@@ -168,18 +190,24 @@ ldap {
 		#  and realms may be used for different users.
 		sasl {
 			# SASL mechanism
-#			mech = 'PLAIN'
-
+    {% if freeradius_ldap.sasl_mech is defined %}
+			mech = '{{ freeradius_ldap.sasl_mech }}'
+	{% endif %}
 			# SASL authorisation identity to proxy.
-#			proxy = &User-Name
-
+    {% if freeradius_ldap.sasl_proxy is defined %}
+	   		proxy = '{{ freeradius_ldap.sasl_proxy }}'
+	{% endif %}
 			# SASL realm. Used for kerberos.
-#			realm = 'example.org'
+    {% if freeradius_ldap.sasl_realm is defined %}
+			realm = '{{ freeradius_ldap.sasl_realm }}'
+	{% endif %}
+
 		}
 
 		#  Search scope, may be 'base', 'one', sub' or 'children'
-#		scope = 'sub'
-
+    {% if freeradius_ldap.scope is defined %}
+		scope = '{{ freeradius_ldap.scope }}'
+	{% endif %}
 		#  Server side result sorting
 		#
 		#  A list of space delimited attributes to order the result
@@ -191,12 +219,16 @@ ldap {
 		#
 		#  If sort_by is set, and the server does not support sorting
 		#  the search will fail.
-#		sort_by = '-uid'
+    {% if freeradius_ldap.sort_by is defined %}
+		sort_by = '{{ freeradius_ldap.sort_by }}'
+	{% endif %}
 
 		#  If this is undefined, anyone is authorised.
 		#  If it is defined, the contents of this attribute
 		#  determine whether or not the user is authorised
-#		access_attribute = 'dialupAccess'
+    {% if freeradius_ldap.access_attribute is defined %}
+		access_attribute = '{{ freeradius_ldap.access_attribute }}'
+	{% endif %}
 
 		#  Control whether the presence of 'access_attribute'
 		#  allows access, or denys access.
@@ -220,7 +252,10 @@ ldap {
 		#    userAccessAllowed: false
 		#
 		#  Will result in the user being locked out.
-#		access_positive = yes
+    {% if freeradius_ldap.access_positive is defined %}
+		access_positive = {{ freeradius_ldap.access_positive }}
+	{% endif %}
+
 	}
 
 	#
@@ -228,24 +263,32 @@ ldap {
 	#
 	group {
 		#  Where to start searching in the tree for groups
-		base_dn = '{{freeradius_ldap_base_dn}}'
+		base_dn = '{{freeradius_ldap.base_dn}}'
 
 		#  Filter for group objects, should match all available
 		#  group objects a user might be a member of.
-		filter = '(objectClass=posixGroup)'
+    {% if freeradius_ldap.group_filter is defined %}
+		filter = '{{ freeradius_ldap.group_filter }}'
+	{% endif %}
 
 		# Search scope, may be 'base', 'one', sub' or 'children'
-#		scope = 'sub'
+    {% if freeradius_ldap.group_scope is defined %}
+		scope = '{{ freeradius_ldap.group_scope }}'
+	{% endif %}
 
 		#  Attribute that uniquely identifies a group.
 		#  Is used when converting group DNs to group
 		#  names.
-#		name_attribute = cn
+    {% if freeradius_ldap.group_name_attribute is defined %}
+		name_attribute = {{ freeradius_ldap.group_name_attribute }}
+	{% endif %}
 
 		#  Filter to find group objects a user is a member of.
 		#  That is, group objects with attributes that
 		#  identify members (the inverse of membership_attribute).
-#       membership_filter = '{{freeradius_ldap_membership_filter}}'
+    {% if freeradius_ldap.group_membership_filter is defined %}
+       membership_filter = '{{freeradius_ldap.group_membership_filter}}'
+	{% endif %}
 
 		#  The attribute in user objects which contain the names
 		#  or DNs of groups a user is a member of.
@@ -253,7 +296,7 @@ ldap {
 		#  Unless a conversion between group name and group DN is
 		#  needed, there's no requirement for the group objects
 		#  referenced to actually exist.
-		membership_attribute = '{{freeradius_ldap_membership_attribute}}'
+		membership_attribute = '{{freeradius_ldap.group_membership_attribute}}'
 
 		#  If cacheable_name or cacheable_dn are enabled,
 		#  all group information for the user will be
@@ -269,14 +312,22 @@ ldap {
 		#  the type that matches the format of your check items
 		#  i.e. if your groups are specified as DNs then enable
 		#  cacheable_dn else enable cacheable_name.
-#		cacheable_name = 'no'
-#		cacheable_dn = 'no'
+    {% if freeradius_ldap.group_cacheable_name is defined %}
+		cacheable_name = '{{ freeradius_ldap.group_cacheable_name }}'
+	{% endif %}
+
+    {% if freeradius_ldap.group_cacheable_dn is defined %}
+		cacheable_dn = '{{ freeradius_ldap.group_cacheable_dn }}'
+	{% endif %}
 
 		#  Override the normal cache attribute (<inst>-LDAP-Group or
 		#  LDAP-Group if using the default instance) and create a
 		#  custom attribute.  This can help if multiple module instances
 		#  are used in fail-over.
-#		cache_attribute = 'LDAP-Cached-Membership'
+    {% if freeradius_ldap.group_cache_attribute is defined %}
+		cache_attribute = '{{ freeradius_ldap.group_cache_attribute }}'
+	{% endif %}
+
 	}
 
 	#
@@ -286,21 +337,27 @@ ldap {
 	#
 	profile {
 		#  Filter for RADIUS profile objects
-#		filter = '(objectclass=radiusprofile)'
-
+    {% if freeradius_ldap.profile_filter is defined %}
+		filter = '{{ freeradius_ldap.profile_filter }}'
+	{% endif %}
 		#  The default profile.  This may be a DN or an attribute
 		#  reference.
 		#  To get old v2.2.x style behaviour, or to use the
 		#  &User-Profile attribute to specify the default profile,
 		#  set this to &control:User-Profile.
-#		default = 'cn=radprofile,dc=example,dc=org'
+    {% if freeradius_ldap.profile_default is defined %}
+		default = '{{ freeradius_ldap.profile_default }}'
+	{% endif %}
 
 		#  The LDAP attribute containing profile DNs to apply
 		#  in addition to the default profile above.  These are
 		#  retrieved from the user object, at the same time as the
 		#  attributes from the update section, are are applied
 		#  if authorization is successful.
-#		attribute = 'radiusProfileDn'
+    {% if freeradius_ldap.profile_attribute is defined %}
+		attribute = '{{ freeradius_ldap.profile_attribute }}'
+	{% endif %}
+
 	}
 
 	#
@@ -309,30 +366,35 @@ ldap {
 	client {
 		#   Where to start searching in the tree for clients
 		#base_dn = "${..base_dn}"
-		base_dn = '{{freeradius_ldap_base_dn}}'
+		base_dn = '{{freeradius_ldap.base_dn}}'
 
 		#
 		#  Filter to match client objects
 		#
-		filter = '(objectClass=radiusClient)'
-
+    {% if freeradius_ldap.client_filter is defined %}
+		filter = '{{ freeradius_ldap.client_filter }}'
+	{% endif %}
 		# Search scope, may be 'base', 'one', 'sub' or 'children'
-#		scope = 'sub'
+    {% if freeradius_ldap.client_scope is defined %}
+    	scope = '{{ freeradius_ldap.client_scope }}'
+	{% endif %}
 
 		#
 		#  Sets default values (not obtained from LDAP) for new client entries
 		#
 		template {
-#			login				= 'test'
-#			password			= 'test'
-#			proto	 			= tcp
-#			require_message_authenticator	= yes
+    {% if freeradius_ldap.client_template is defined %}
+			login				= '{{ freeradius_ldap.client_template.login }}'
+ 			password			= '{{ freeradius_ldap.client_template.password }}'
+			proto	 			= '{{ freeradius_ldap.client_template.proto }}'
+			require_message_authenticator	= '{{ freeradius_ldap.client_template.require_message_authenticator }}'
 
 			# Uncomment to add a home_server with the same
 			# attributes as the client.
-#			coa_server {
-#				response_window = 2.0
-#			}
+			coa_server {
+				response_window = '{{ freeradius_ldap.client_template.response_window }}'
+			}
+	{% endif %}
 		}
 
 		#
@@ -349,69 +411,32 @@ ldap {
 		#  Schemas are available in doc/schemas/ldap for openldap and eDirectory
 		#
 		attribute {
+    {% if freeradius_ldap.client_attribute.ipaddr is defined %}
 			ipaddr				= 'radiusClientIdentifier'
+	{% endif %}
+    {% if freeradius_ldap.client_attribute.secret is defined %}
 			secret				= 'radiusClientSecret'
-#			shortname			= 'radiusClientShortname'
-#			nas_type			= 'radiusClientType'
-#			virtual_server			= 'radiusClientVirtualServer'
-#			require_message_authenticator	= 'radiusClientRequireMa'
+	{% endif %}
+    {% if freeradius_ldap.client_attribute.shortname is defined %}
+			shortname			= '{{ freeradius_ldap.client_attribute.shortname }}'
+	{% endif %}
+    {% if freeradius_ldap.client_attribute.nas_type is defined %}
+			nas_type			= '{{ freeradius_ldap.client_attribute.nas_type }}'
+	{% endif %}
+    {% if freeradius_ldap.client_attribute.virtual_server is defined %}
+			virtual_server			= '{{ freeradius_ldap.client_attribute.virtual_server }}'
+	{% endif %}
+    {% if freeradius_ldap.client_attribute.require_message_authenticator is defined %}
+			require_message_authenticator	= '{{ freeradius_ldap.client_attribute.require_message_authenticator }}'
+	{% endif %}
+
 		}
 	}
 
 	#  Load clients on startup
-#	read_clients = no
-
-	#
-	#  Modify user object on receiving Accounting-Request
-	#
-
-	#  Useful for recording things like the last time the user logged
-	#  in, or the Acct-Session-ID for CoA/DM.
-	#
-	#  LDAP modification items are in the format:
-	# 	<ldap attr> <op> <value>
-	#
-	#  Where:
-	#  	<ldap attr>:	The LDAP attribute to add modify or delete.
-	#  	<op>: 		One of the assignment operators:
-	#			(:=, +=, -=, ++).
-	#			Note: '=' is *not* supported.
-	#  	<value>:	The value to add modify or delete.
-	#
-	#  WARNING: If using the ':=' operator with a multi-valued LDAP
-	#  attribute, all instances of the attribute will be removed and
-	#  replaced with a single attribute.
-#	accounting {
-
-#		type {
-#			start {
-#				update {
-#					description := "Online at %S"
-#				}
-#			}
-
-#			interim-update {
-#				update {
-#					description := "Last seen at %S"
-#				}
-#			}
-
-#			stop {
-#				update {
-#					description := "Offline at %S"
-#				}
-#			}
-#		}
-#	}
-
-	#
-	#  Post-Auth can modify LDAP objects too
-	#
-#	post-auth {
-#		update {
-#			description := "Authenticated at %S"
-#		}
-#	}
+    {% if freeradius_ldap.read_clients is defined %}
+	read_clients = {{ freeradius_ldap.read_clients }}
+	{% endif %}
 
 	#
 	#  LDAP connection-specific options.
@@ -424,8 +449,9 @@ ldap {
 		#  default: libldap's default which is usually 'never'.
 		#
 		#  LDAP_OPT_DEREF is set to this value.
-#		dereference = 'always'
-
+    {% if freeradius_ldap.options_dereference is defined %}
+		dereference = '{{ freeradius_ldap.options_dereference }}'
+	{% endif %}
 		#
 		#  The following two configuration items control whether the
 		#  server follows references returned by LDAP directory.
@@ -433,32 +459,32 @@ ldap {
 		#  If you set these to 'no', then searches will likely return
 		#  'operations error', instead of a useful result.
 		#
-		chase_referrals = yes
-		rebind = yes
+		chase_referrals = {{ freeradius_ldap.options_chase_referrals }}
+		rebind = {{ freeradius_ldap.options_rebind }}
 
 		#  Seconds to wait for LDAP query to finish. default: 20
-		res_timeout = 10
+		res_timeout = {{ freeradius_ldap.options_res_timeout }}
 
 		#  Seconds LDAP server has to process the query (server-side
 		#  time limit). default: 20
 		#
 		#  LDAP_OPT_TIMELIMIT is set to this value.
-		srv_timelimit = 3
+		srv_timelimit = {{ freeradius_ldap.options_srv_timelimit }}
 
 		#  Seconds to wait for response of the server. (network
 		#  failures) default: 10
 		#
 		#  LDAP_OPT_NETWORK_TIMEOUT is set to this value.
-		net_timeout = 1
+		net_timeout = {{ freeradius_ldap.options_net_timeout }}
 
 		#  LDAP_OPT_X_KEEPALIVE_IDLE
-		idle = 60
+		idle = {{ freeradius_ldap.options_idle }}
 
 		#  LDAP_OPT_X_KEEPALIVE_PROBES
-		probes = 3
+		probes = {{ freeradius_ldap.options_probes }}
 
 		#  LDAP_OPT_X_KEEPALIVE_INTERVAL
-		interval = 3
+		interval = {{ freeradius_ldap.options_interval }}
 
 		#  ldap_debug: debug flag for LDAP SDK
 		#  (see OpenLDAP documentation).  Set this to enable
@@ -467,7 +493,7 @@ ldap {
 		#
 		#	default: 0x0000 (no debugging messages)
 		#	Example:(LDAP_DEBUG_FILTER+LDAP_DEBUG_CONNS)
-		ldap_debug = 0x0028
+		ldap_debug = {{ freeradius_ldap.options_ldap_debug }}
 	}
 
 	#
@@ -486,14 +512,15 @@ ldap {
 		# The StartTLS operation is supposed to be
 		# used with normal ldap connections instead of
 		# using ldaps (port 636) connections
-#		start_tls = yes
+    {% if freeradius_ldap.tls is defined %}
+		start_tls = {{ freeradius_ldap.tls.start_tls }}
 
-#		ca_file	= ${certdir}/cacert.pem
+		ca_file	= {{ freeradius_ldap.tls.ca_file }}
 
-#		ca_path	= ${certdir}
-#		certificate_file = /path/to/radius.crt
-#		private_key_file = /path/to/radius.key
-#		random_file = /dev/urandom
+		ca_path	= {{ freeradius_ldap.tls.ca_path }}
+		certificate_file = {{ freeradius_ldap.tls.certificate_file }}
+		private_key_file = {{ freeradius_ldap.tls.private_key_file }}
+		random_file = {{ freeradius_ldap.tls.random_file }}
 
  		#  Certificate Verification requirements.  Can be:
 		#    'never' (do not even bother trying)
@@ -506,7 +533,8 @@ ldap {
 		#  The default is libldap's default, which varies based
 		#  on the contents of ldap.conf.
 
-#		require_cert	= 'demand'
+		require_cert	= '{{ freeradius_ldap.tls.require_cert }}'
+	{% endif %}
 	}
 
 	#  As of version 3.0, the 'pool' section has replaced the
@@ -525,10 +553,10 @@ ldap {
 		#  connections during instantiation it will exit.
 		#  Set to 0 to allow the server to start without the
 		#  directory being available.
-		start = ${thread[pool].start_servers}
+		start = {{ freeradius_ldap.pool_start }} 
 
 		#  Minimum number of connections to keep open
-		min = ${thread[pool].min_spare_servers}
+		min = {{ freeradius_ldap.pool_min }} 
 
 		#  Maximum number of connections
 		#
@@ -541,30 +569,30 @@ ldap {
 		#
 		#  Setting 'max' to MORE than the number of threads means
 		#  that there are more connections than necessary.
-		max = ${thread[pool].max_servers}
+		max = {{ freeradius_ldap.pool_max }} 
 
 		#  Spare connections to be left idle
 		#
 		#  NOTE: Idle connections WILL be closed if "idle_timeout"
 		#  is set.  This should be less than or equal to "max" above.
-		spare = ${thread[pool].max_spare_servers}
+		spare = {{ freeradius_ldap.pool_spare }} 
 
 		#  Number of uses before the connection is closed
 		#
 		#  0 means "infinite"
-		uses = 0
+		uses = {{ freeradius_ldap.pool_uses }} 
 
 		#  The number of seconds to wait after the server tries
 		#  to open a connection, and fails.  During this time,
 		#  no new connections will be opened.
-		retry_delay = 30
+		retry_delay = {{ freeradius_ldap.pool_retry_delay }} 
 
 		#  The lifetime (in seconds) of the connection
-		lifetime = 0
+		lifetime = {{ freeradius_ldap.pool_lifetime }} 
 
 		#  Idle timeout (in seconds).  A connection which is
 		#  unused for this length of time will be closed.
-		idle_timeout = 60
+		idle_timeout = {{ freeradius_ldap.pool_idle_timeout }} 
 
 		#  NOTE: All configuration settings are enforced.  If a
 		#  connection is closed because of 'idle_timeout',

@@ -1,11 +1,25 @@
 {% for client in freeradius_clients %}
 
 client {{ client.name }} {
+{% if client.ipaddr is defined %}
     ipaddr    = {{ client.ipaddr }}
+{% endif %}
+{% if client.ipv6addr is defined %}
+    ipv6addr    = {{ client.ipv6addr }}
+{% endif %}
     secret    = {{ client.secret|default(freeradius_clients_default_password,true) }}
     shortname = {{ client.name }}
     nastype   = other
     require_message_authenticator = no
+    {% if client.limit is defined %}
+    limit {
+    	{% for limit in client.limit %}
+	      lifetime = {{ limit.lifetime }}
+	      max_connections = {{ limit.max_connections }}
+	      idle_timeout= {{ limit.idle_timeout }}
+    	{% endfor %}
+    	}
+    {% endif %}
 }
 
 {% endfor%}

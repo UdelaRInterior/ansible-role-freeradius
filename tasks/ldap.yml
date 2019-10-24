@@ -8,8 +8,8 @@
     restart freeradius
 
 - name: copy file config sites
-  copy:
-    src: 'files/{{ item }}'
+  template:
+    src: '{{ item }}.j2'
     dest: "/etc/freeradius/{{ freeradius_version }}/sites-available/{{ item }}"
   with_items:
     - default

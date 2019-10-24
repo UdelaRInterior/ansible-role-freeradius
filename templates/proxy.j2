@@ -1,0 +1,66 @@
+proxy server {
+        default_fallback = no
+}
+{% for home_server in freeradius_proxy %}
+home_server {{ home_server.name }} {
+        type = {{ home_server.type }}
+        ipaddr = {{ home_server.ipaddr }}
+        port = {{ home_server.port }}
+        secret = {{ home_server.secret }}
+        response_window = {{ home_server.response_window }}
+        zombie_period = {{ home_server.zombie_period }}
+        revive_interval = {{ home_server.revive_interval }}
+        status_check = {{ home_server.status_check }}
+        check_interval = {{ home_server.check_interval }}
+        check_timeout = {{ home_server.check_timeout }}
+        num_answers_to_alive = {{ home_server.num_answers_to_alive }}
+        max_outstanding = {{ home_server.max_outstanding }}
+        coa {
+                irt = {{ home_server.coa.irt }}
+                mrt = {{ home_server.coa.mrt }}
+                mrc = {{ home_server.coa.mrc }}
+                mrd = {{ home_server.coa.mrd }}
+        }
+        limit {
+              max_connections = {{ home_server.limit.max_connections }}
+              max_requests = {{ home_server.limit.max_requests }}
+              lifetime = {{ home_server.limit.lifetime }}
+              idle_timeout = {{ home_server.limit.idle_timeout }}
+        }
+}
+{% endfor %}
+
+home_server_pool my_localhost {
+        type            = fail-over
+        home_server     = localhost
+}
+
+{% for home_server in freeradius_proxy %}
+{% if home_server.name != 'localhost' %}
+home_server_pool my_auth_failover {
+        type = fail-over
+        home_server = {{ home_server.name }}
+}
+{% endif %}
+{% endfor %}
+
+realm DEFAULT {
+        auth_pool = my_auth_failover
+        nostrip
+}
+
+realm LOCAL {
+}
+
+realm NULL {
+        secret          = {{ freeradius_clients_default_password }}
+}
+
+{% for realm_item in freeradius_realm %}
+
+realm "~(.*\.)*{{ realm_item | replace(".", "\.") }}$" {
+        auth_pool       = my_localhost
+        secret          = {{ freeradius_clients_default_password }}
+}
+
+{% endfor %}

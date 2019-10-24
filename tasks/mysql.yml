@@ -1,45 +1,45 @@
 ---
 - name:  enable mysql driver
   lineinfile:
-    path: "/etc/freeradius/{{ freeradius_version }}/mods-available/sql"
+    path: '/etc/freeradius/{{ freeradius_version }}/mods-available/sql'
     regexp: '^\s*driver ='
-    line: "\tdriver = \"rlm_sql_mysql\""
+    line: '\tdriver = \"rlm_sql_mysql\"'
 
 - name:  set dialect to mysql
   lineinfile:
-    path: "/etc/freeradius/{{ freeradius_version }}/mods-available/sql"
+    path: '/etc/freeradius/{{ freeradius_version }}/mods-available/sql'
     regexp: '^\s*dialect ='
-    line: "\tdialect = \"mysql\""
+    line: '\tdialect = \"mysql\"'
 
 - name:  mysql connection
   lineinfile:
-    path: "/etc/freeradius/{{ freeradius_version }}/mods-available/sql"
+    path: '/etc/freeradius/{{ freeradius_version }}/mods-available/sql'
     regexp: '^#?\s*{{ item.name }} ='
-    line: "\t{{ item.name }} = {{ item.value}}"
+    line: '\t{{ item.name }} = {{ item.value }}'
   with_items:
-    - { name: 'server', value: "{{ freeradius_mysql.host}}" }
+    - { name: 'server', value: '{{ freeradius_mysql.host }}' }
     - { name: 'port', value: '3306'}
-    - { name: 'login', value: "{{ freeradius_mysql.user }}" }
-    - { name: 'password', value: "{{ freeradius_mysql.password }}" }
+    - { name: 'login', value: '{{ freeradius_mysql.user }}' }
+    - { name: 'password', value: '{{ freeradius_mysql.password }}' }
 
 - name:  set radius_db
   lineinfile:
-    path: "/etc/freeradius/{{ freeradius_version }}/mods-available/sql"
+    path: '/etc/freeradius/{{ freeradius_version }}/mods-available/sql'
     regexp: '^\s*radius_db ='
-    line: "\tradius_db = \"{{freeradius_mysql.database}}\""
+    line: '\tradius_db = \"{{freeradius_mysql.database}}\"'
 
 - name:  set read_clients to yes
   lineinfile:
-    path: "/etc/freeradius/{{ freeradius_version }}/mods-available/sql"
+    path: '/etc/freeradius/{{ freeradius_version }}/mods-available/sql'
     regexp: '^\s*read_clients ='
-    line: "\tread_clients = yes"
+    line: '\tread_clients = yes'
 
 # https://wiki.freeradius.org/guide/SQL-HOWTO-for-freeradius-3.x-on-Debian-Ubuntu#configuring-freeradius-to-use-sql
 - name:  enable SQL module
   file:
     state: link
-    src: "/etc/freeradius/{{ freeradius_version }}/mods-available/sql"
-    dest: "/etc/freeradius/{{ freeradius_version }}/mods-enabled/sql"
+    src: '/etc/freeradius/{{ freeradius_version }}/mods-available/sql'
+    dest: '/etc/freeradius/{{ freeradius_version }}/mods-enabled/sql'
 
 # Edit /etc/raddb/sites-available/default and uncomment the line containing 'sql' in the authorize{} section.
 # Optionally add or uncomment 'sql' to the session{} section if you want to do Simultaneous-Use detection

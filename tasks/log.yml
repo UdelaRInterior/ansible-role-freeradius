@@ -1,12 +1,11 @@
 ---
 - name: log
   lineinfile:
-    path: "/etc/freeradius/{{ freeradius_version }}/radiusd.conf"
+    path: '/etc/freeradius/{{ freeradius_version }}/radiusd.conf'
     regexp: '^\s*{{ item.name }} ='
-    line: "\t{{ item.name }} = {{ item.value}}"
+    line: '\t{{ item.name }} = {{ item.value}}'
   with_items:
     - { name: 'stripped_names', value: 'yes'}
     - { name: 'auth', value: 'yes'}
     - { name: 'auth_badpass', value: 'yes'}
     - { name: 'auth_goodpass', value: 'yes'}
-

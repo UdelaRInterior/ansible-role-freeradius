@@ -3,7 +3,7 @@
 - name: copy template
   template:
     src: '{{ item }}.j2'
-    dest: "/etc/freeradius/{{ freeradius_version }}/{{ item }}.conf"
+    dest: '/etc/freeradius/{{ freeradius_version }}/{{ item }}.conf'
   with_items:
     - clients
     - proxy

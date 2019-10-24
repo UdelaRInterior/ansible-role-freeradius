@@ -1,7 +1,7 @@
 ---
 - name: install freeradius
   apt:
-    name: "{{ item }}"
+    name: '{{ item }}'
     state: latest
     update_cache: yes
   with_items:
@@ -19,7 +19,7 @@
 
 - name: Install the MySQL-python through pip
   pip:
-    name: "{{ item }}"
+    name: '{{ item }}'
     state: present
   with_items:
     - MySQL-python
@@ -32,7 +32,7 @@
 - name: copy template certificates
   template:
     src: '{{ item }}.j2'
-    dest: "/etc/freeradius/{{ freeradius_version }}/certs/{{ item }}"
+    dest: '/etc/freeradius/{{ freeradius_version }}/certs/{{ item }}'
   with_items:
     - ca.cnf
     - server.cnf
@@ -47,7 +47,7 @@
     group: freerad
     mode: '0440'
 
-- name: Generate an OpenSSL private key 
+- name: Generate an OpenSSL private key
   openssl_privatekey:
     path: /etc/freeradius/3.0/certs/server.key
     passphrase: '{{ freeradius_password_ca }}'
@@ -55,10 +55,10 @@
     size: 2048
     state: present
 
-- name: "Generate csr"
+- name: Generate csr
   openssl_csr:
-    path: "/etc/freeradius/3.0/certs/radius.interior.csr"
-    privatekey_path: "/etc/freeradius/3.0/certs/server.key"
+    path: '/etc/freeradius/3.0/certs/radius.interior.csr'
+    privatekey_path: '/etc/freeradius/3.0/certs/server.key'
     country_name: '{{ freeradius_code_country }}'
     organization_name: '{{ freeradius_organization }}'
     email_address: '{{ freeradius_email }}'

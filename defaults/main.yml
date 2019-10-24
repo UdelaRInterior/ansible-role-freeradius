@@ -2,13 +2,11 @@
 # defaults file for ansible-role-freeradius
 
 freeradius_version: '3.0'
-
 freeradius_clients_default_password: mysecret
-
 freeradius_clients:
   - name: localhost
     ipaddr: 127.0.0.1
-    secret: "{{ freeradius_clients_default_password }}"
+    secret: '{{ freeradius_clients_default_password }}'
     shortname: localhost
     nastype: other
     require_message_authenticator: no
@@ -18,7 +16,7 @@ freeradius_clients:
       idle_timeout: 30
   - name: switch_filosofia
     ipaddr: 192.168.66.1
-    secret: "{{ freeradius_clients_default_password }}"
+    secret: '{{ freeradius_clients_default_password }}'
     shortname: localhost
     nastype: other
     require_message_authenticator: no
@@ -27,10 +25,10 @@ freeradius_clients:
       lifetime: 0
       idle_timeout: 30
 
-freeradius_realm: 
-  - domine1
-  - domine2
-  - domine3
+freeradius_realm:
+  - domain1
+  - domain2
+  - domain3
 
 freeradius_proxy:
   - name: localhost
@@ -103,6 +101,3 @@ freeradius_locality: Montevideo
 freeradius_organization: Example Inc.
 freeradius_email: admin@example.net
 freeradius_common_name: server.edu.net
-
-
-

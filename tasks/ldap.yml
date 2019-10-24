@@ -3,14 +3,14 @@
 - name: copy template config ldap
   template:
     src: ldap.j2
-    dest: "/etc/freeradius/{{ freeradius_version }}/mods-available/ldap"
+    dest: '/etc/freeradius/{{ freeradius_version }}/mods-available/ldap'
   notify:
     restart freeradius
 
 - name: copy file config sites
   template:
     src: '{{ item }}.j2'
-    dest: "/etc/freeradius/{{ freeradius_version }}/sites-available/{{ item }}"
+    dest: '/etc/freeradius/{{ freeradius_version }}/sites-available/{{ item }}'
   with_items:
     - default
     - inner-tunnel
@@ -19,7 +19,7 @@
 
 - name: Activate ldap freeradius
   file:
-    path: "/etc/freeradius/{{ freeradius_version }}/mods-enabled/ldap"
-    src: "/etc/freeradius/{{ freeradius_version }}/mods-available/ldap"
+    path: '/etc/freeradius/{{ freeradius_version }}/mods-enabled/ldap'
+    src: '/etc/freeradius/{{ freeradius_version }}/mods-available/ldap'
     state: link
   notify: restart freeradius

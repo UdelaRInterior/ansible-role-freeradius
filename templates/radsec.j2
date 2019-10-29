@@ -1,0 +1,117 @@
+listen {
+    ipaddr = *
+    port = 2083
+    type = auth
+    proto = tcp
+    virtual_server = default
+    clients = radsec
+    limit {
+        max_connections = 0
+        lifetime = 0
+        idle_timeout = 3600
+    }
+    tls {
+        certdir = ${confdir}/certs/radsec
+        cadir = ${confdir}/certs/radsec
+        private_key_password = <clave-privada-radius>
+        private_key_file = /etc/freeradius/3.0/certs/newcerts/private/radius.key
+        certificate_file = /etc/freeradius/3.0/certs/newcerts/radius.interior.crt
+        ca_file = /etc/freeradius/3.0/certs/newcerts/ca.crt
+        dh_file = /etc/freeradius/3.0/certs/newcerts/dh
+        random_file = /etc/freeradius/3.0/certs/newcerts/random
+        fragment_size = 8192
+        include_length = yes
+        cipher_list = "DEFAULT"
+        cache {
+              enable = yes
+              lifetime = 24 # hours
+              max_entries = 255
+        }
+        require_client_cert = yes
+        verify {
+        }
+    }
+}
+listen {
+    ipv6addr = ::
+    port = 2083
+    type = auth
+    proto = tcp
+    clients = radsec
+    tls {
+        certdir = ${confdir}/certs/radsec
+        cadir = ${confdir}/certs/radsec
+        private_key_password = <clave-privada-radius>
+        private_key_file = /etc/freeradius/3.0/certs/newcerts/private/radius.key
+        certificate_file = /etc/freeradius/3.0/certs/newcerts/radius.interior.crt
+        ca_file = /etc/freeradius/3.0/certs/newcerts/ca.crt
+        dh_file = /etc/freeradius/3.0/certs/newcerts/dh
+        random_file = /etc/freeradius/3.0/certs/newcerts/random
+        fragment_size = 8192
+        include_length = yes
+        cipher_list = "DEFAULT"
+        cache {
+              enable = yes
+              max_entries = 255
+        }
+        require_client_cert = yes
+        verify {
+        }
+    }
+}
+clients radsec {
+    limit {
+        max_connections = 0
+        lifetime = 0
+        idle_timeout = 3600
+    }
+    client 127.0.0.1 {
+        ipaddr = 127.0.0.1
+        proto = tls
+        secret = {{ freeradius_clients_default_password }}
+    }
+    client uy {
+        ipaddr = 164.73.128.76
+        proto = tls
+        secret = <clave-GPG>
+        limit {
+                max_connections = 0
+                lifetime = 0
+                idle_timeout = 3600
+        }
+    }
+}
+listen {
+       ipaddr = 127.0.0.1
+       port = 4000
+       type = auth
+}
+home_server uy1 {
+    ipaddr = 164.73.128.76
+    port = 2083
+    type = auth
+    secret = {{ freeradius_clients_default_password }}
+    proto = tcp
+    status_check = none
+    tls {
+        certdir = ${confdir}/certs/radsec
+        cadir = ${confdir}/certs/radsec
+        private_key_password = {{ freeradius_password_ca }}
+        private_key_file = /etc/freeradius/3.0/certs/newcerts/private/server.key
+        certificate_file = /etc/freeradius/3.0/certs/newcerts/radius.interior.crt
+        ca_file = /etc/freeradius/3.0/certs/newcerts/ca.crt
+        dh_file = /etc/freeradius/3.0/certs/newcerts/dh
+        random_file = /etc/freeradius/3.0/certs/newcerts/random
+        fragment_size = 1500
+        include_length = yes
+        cipher_list = "DEFAULT"
+    }
+}
+home_server_pool UY {
+         type = fail-over
+         home_server = uy1
+}
+realm "~.+$" {
+       auth_pool = UY
+       nostrip
+}

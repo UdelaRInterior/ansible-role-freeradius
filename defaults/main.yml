@@ -94,10 +94,11 @@ freeradius_ldap:
   pool_lifetime: 0
   pool_idle_timeout: 60
 
+freeradius_serial: '01'
 freeradius_password_ca: '{{ freeradius_vault_password_ca }}'
 freeradius_code_country: UY
 freeradius_state: Montevideo
 freeradius_locality: Montevideo
-freeradius_organization: Example Inc.
+freeradius_organization: RAU
 freeradius_email: admin@example.net
 freeradius_common_name: server.edu.net

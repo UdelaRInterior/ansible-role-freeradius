@@ -14,8 +14,20 @@
   with_items:
     - default
     - inner-tunnel
+    - radsec
   notify:
     restart freeradius
+
+- name: Activate sites freeradius
+  file:
+    path: '/etc/freeradius/{{ freeradius_version }}/sites-enabled/{{ item }}'
+    src: '/etc/freeradius/{{ freeradius_version }}/sites-available/{{ item }}'
+    state: link
+  with_items:
+    - default
+    - inner-tunnel
+    - radsec
+  notify: restart freeradius
 
 - name: Activate ldap freeradius
   file:

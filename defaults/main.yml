@@ -3,6 +3,7 @@
 
 freeradius_version: '3.0'
 freeradius_clients_default_password: mysecret
+freeradius_create_certificates: True
 freeradius_clients:
   - name: localhost
     ipaddr: 127.0.0.1

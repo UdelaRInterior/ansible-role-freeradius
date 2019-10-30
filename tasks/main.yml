@@ -15,3 +15,7 @@
 - name: INCLUDE | config LDAP
   include_tasks: ldap.yml
   when: freeradius_system_users == 'ldap'
+
+- name: INCLUDE | create certificates
+  include_tasks: certificates.yml
+  when: freeradius_create_certificates

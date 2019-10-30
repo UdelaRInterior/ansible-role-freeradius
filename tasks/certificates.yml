@@ -1,0 +1,91 @@
+---
+
+- name: Creates directories
+  file:
+    path: '{{ item }}'
+    state: directory
+    owner: freerad
+    group: freerad
+  with_items:
+    - /etc/freeradius/3.0/certs/newcerts
+    - /etc/freeradius/3.0/certs/newcerts/private
+
+- name: copy template certificates
+  template:
+    src: 'server.cnf.j2'
+    dest: '/etc/freeradius/{{ freeradius_version }}/certs/newcerts/server.cnf'
+  notify:
+    restart freeradius
+
+- name: Download ca.crt
+  get_url:
+    url: http://eduroam.uy/docs/ca.crt
+    dest: /etc/freeradius/3.0/certs/newcerts/ca.crt
+    mode: '0440'
+
+- name: Generate an OpenSSL private key
+  openssl_privatekey:
+    path: /etc/freeradius/3.0/certs/newcerts/private/server.key
+    passphrase: '{{ freeradius_password_ca }}'
+    cipher: auto
+    size: 4096
+    state: present
+
+- name: Generate DH Parameters
+  openssl_dhparam:
+    path: /etc/freeradius/3.0/certs/newcerts/dh
+    size: 1024
+
+- name: check if the random file exists
+  stat:
+    path: /etc/freeradius/3.0/certs/newcerts/random
+  register: stat_result
+
+- name: Generate a random string
+  command: 'dd if=/dev/urandom of=./random count=10'
+  args:
+    chdir: /etc/freeradius/3.0/certs/newcerts
+  when: stat_result.stat.exists == False
+
+- name: Touch index.txt
+  file:
+    path: /etc/freeradius/3.0/certs/newcerts/index.txt
+    state: touch
+
+- name: Copy file serial
+  template:
+    src: 'serial.j2'
+    dest: '/etc/freeradius/3.0/certs/newcerts/serial'
+
+- name: Generate csr
+  openssl_csr:
+    path: '/etc/freeradius/3.0/certs/newcerts/radius.interior.csr'
+    privatekey_path: '/etc/freeradius/3.0/certs/newcerts/private/server.key'
+    country_name: '{{ freeradius_code_country }}'
+    organization_name: '{{ freeradius_organization }}'
+    email_address: '{{ freeradius_email }}'
+    state_or_province_name: '{{ freeradius_state }}'
+    common_name: '{{ freeradius_common_name }}'
+    privatekey_passphrase: '{{ freeradius_password_ca }}'
+
+- name: Recursively change ownership of a directory
+  file:
+    path: /etc/freeradius/3.0/certs
+    state: directory
+    recurse: yes
+    owner: freerad
+    group: freerad
+
+- name: copy radsec config sites
+  template:
+    src: 'radsec.j2'
+    dest: '/etc/freeradius/{{ freeradius_version }}/sites-available/radsec'
+  notify:
+    restart freeradius
+
+- name: Activate radsec
+  file:
+    path: '/etc/freeradius/{{ freeradius_version }}/sites-enabled/radsec'
+    src: '/etc/freeradius/{{ freeradius_version }}/sites-available/radsec'
+    state: link
+  notify: restart freeradius

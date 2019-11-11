@@ -20,6 +20,7 @@ Role Variables
 
 freeradius_version: '3.0'
 freeradius_clients_default_password:                     ## Password used to connect routers 
+freeradius_create_certificates: True
 
 ## multiple clients can be defined
 freeradius_clients:                                      

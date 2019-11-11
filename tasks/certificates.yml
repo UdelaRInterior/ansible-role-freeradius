@@ -4,8 +4,6 @@
   file:
     path: '{{ item }}'
     state: directory
-    owner: freerad
-    group: freerad
   with_items:
     - /etc/freeradius/3.0/certs/newcerts
     - /etc/freeradius/3.0/certs/newcerts/private

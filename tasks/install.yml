@@ -10,19 +10,9 @@
     - freeradius-ldap
     - freeradius-utils
     - default-libmysqlclient-dev
-    - mysql-client
-
-- name: Ensure Pip is installed.
-  package:
-    name: python-pip
-    state: present
-
-- name: Install the MySQL-python through pip
-  pip:
-    name: '{{ item }}'
-    state: present
-  with_items:
-    - MySQL-python
+    - mariadb-client
+    - mariadb-server
+    - python-mysqldb
 
 - name: enable freeradius
   service:
